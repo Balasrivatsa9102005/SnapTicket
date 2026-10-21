@@ -123,4 +123,43 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred",
                 request);
     }
+    
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleBadCredentials(
+            org.springframework.security.authentication.BadCredentialsException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                HttpStatus.UNAUTHORIZED, 
+                "Invalid email or password",
+                request
+        );
+    }
+    
+    @ExceptionHandler(java.util.NoSuchElementException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoSuchElement(
+            java.util.NoSuchElementException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST, 
+                "Requested resource or seat element could not be found in the database.",
+                request
+        );
+    }
+    
+    @ExceptionHandler(com.busbooking.exceptions.InvalidSeatException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSeat(
+            com.busbooking.exceptions.InvalidSeatException ex,
+            HttpServletRequest request) {
+
+        return buildResponse(
+                HttpStatus.BAD_REQUEST, 
+                ex.getMessage(),
+                request
+        );
+    }
+
+
+
 }

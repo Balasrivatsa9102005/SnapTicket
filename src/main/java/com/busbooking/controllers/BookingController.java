@@ -1,22 +1,19 @@
-
 package com.busbooking.controllers;
 
 import java.util.List;
-
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.bind.annotation.*;
 
 import com.busbooking.dto.BookingRequestDTO;
 import com.busbooking.dto.BookingResponseDTO;
 import com.busbooking.services.BookingService;
 
 @RestController
+@RequestMapping("/api")
 public class BookingController {
 
     private final BookingService bookingService;
@@ -25,44 +22,64 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
-    private boolean isAdmin(Jwt jwt) {
-        List<String> roles = jwt.getClaimAsStringList("roles");
-        return roles != null && roles.contains("ROLE_ADMIN");
-    }
-
-    @PostMapping("/api/createBooking")
-    public BookingResponseDTO createBooking(
+    @PostMapping("/createBooking")
+    public ResponseEntity<BookingResponseDTO> createBooking(
             @RequestBody BookingRequestDTO dto,
-            @AuthenticationPrincipal Jwt jwt) {
+            Authentication authentication) {
 
-        return bookingService.createBooking(
-                dto, jwt.getSubject(), isAdmin(jwt));
+        if (authentication == null) {
+            throw new org.springframework.security.authentication.BadCredentialsException(
+                    "Missing or invalid token authentication context");
+        }
+
+        String email = authentication.getName(); 
+        
+        List<String> roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+                
+        boolean isAdmin = roles.contains("ROLE_ADMIN");
+
+        BookingResponseDTO response = bookingService.createBooking(dto, email, isAdmin);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/api/findBooking/{id}")
-    public BookingResponseDTO findBookingById(
+    @GetMapping("/booking/{id}")
+    public ResponseEntity<BookingResponseDTO> getBookingById(
             @PathVariable Long id,
-            @AuthenticationPrincipal Jwt jwt) {
+            Authentication authentication) {
 
-        return bookingService.findBookingById(
-                id, jwt.getSubject(), isAdmin(jwt));
+        String email = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        BookingResponseDTO response = bookingService.findBookingById(id, email, isAdmin);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/userBookings/{userId}")
-    public List<BookingResponseDTO> findBookingByUserId(
+    @GetMapping("/booking/user/{userId}")
+    public ResponseEntity<List<BookingResponseDTO>> getBookingsByUserId(
             @PathVariable Long userId,
-            @AuthenticationPrincipal Jwt jwt) {
+            Authentication authentication) {
 
-        return bookingService.findBookingByUserId(
-                userId, jwt.getSubject(), isAdmin(jwt));
+        String email = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        List<BookingResponseDTO> responses = bookingService.findBookingByUserId(userId, email, isAdmin);
+        return ResponseEntity.ok(responses);
     }
 
-    @DeleteMapping("/api/cancelBooking/{id}")
-    public String cancelBooking(
+    @DeleteMapping("/booking/{id}")
+    public ResponseEntity<String> cancelBooking(
             @PathVariable Long id,
-            @AuthenticationPrincipal Jwt jwt) {
+            Authentication authentication) {
 
-        return bookingService.cancelBooking(
-                id, jwt.getSubject(), isAdmin(jwt));
+        String email = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        String message = bookingService.cancelBooking(id, email, isAdmin);
+        return ResponseEntity.ok(message);
     }
 }

@@ -4,6 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class User {
@@ -16,6 +20,8 @@ public class User {
 	private String phone;
 	private String role = "USER";
 	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Booking> bookings = new ArrayList<>();
 	
 	public User(String name, String email, String password, String phone) {
 		this.name = name;
@@ -25,6 +31,14 @@ public class User {
 	}
 	public User() {}
 	
+	public List<Booking> getBookings() {
+		return bookings;
+	}
+
+	public void setBookings(List<Booking> bookings) {
+		this.bookings = bookings;
+	}
+
 	public Long getId() {
 		return id;
 	}

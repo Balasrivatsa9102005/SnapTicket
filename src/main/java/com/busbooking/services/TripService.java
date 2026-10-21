@@ -53,9 +53,14 @@ public class TripService {
     }
 
     private void validateTimes(TripRequestDTO dto) {
-        if (!dto.arrivalTime().isAfter(dto.departureTime())) {
+        if (dto.departureTime() == null || dto.arrivalTime() == null) {
             throw new IllegalArgumentException(
-                    "Arrival time must be after departure time");
+                    "Departure time and arrival time are required");
+        }
+
+        if (dto.arrivalTime().equals(dto.departureTime())) {
+            throw new IllegalArgumentException(
+                    "Arrival time cannot be the same as departure time");
         }
     }
 

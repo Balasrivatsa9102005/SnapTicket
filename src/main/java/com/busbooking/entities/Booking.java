@@ -5,6 +5,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Booking {
@@ -19,11 +23,22 @@ public class Booking {
     @ManyToOne
     private Trip trip;
     
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingSeat> bookingSeats = new ArrayList<>();
+    
     public Booking() {}
 
 	public Booking(User user, Trip trip) {
 		this.user = user;
 		this.trip = trip;
+	}
+
+	public List<BookingSeat> getBookingSeats() {
+		return bookingSeats;
+	}
+
+	public void setBookingSeats(List<BookingSeat> bookingSeats) {
+		this.bookingSeats = bookingSeats;
 	}
 
 	public Long getId() {
@@ -49,5 +64,4 @@ public class Booking {
 	public void setTrip(Trip trip) {
 		this.trip = trip;
 	}
-
 }
