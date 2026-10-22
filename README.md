@@ -126,11 +126,11 @@ Install the following before running the application:
 ### 1. Clone the Repository
 
 ```bash
-git clone <YOUR_REPOSITORY_URL>
+git clone https://github.com/Balasrivatsa9102005/SnapTicket.git
 cd Bus-Booking-System
 ```
 
-Replace `<YOUR_REPOSITORY_URL>` with your Git repository URL.
+
 
 ### 2. Configure the Database
 
