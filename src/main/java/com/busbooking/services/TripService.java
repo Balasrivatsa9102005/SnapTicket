@@ -1,5 +1,6 @@
 package com.busbooking.services;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -166,5 +167,13 @@ public class TripService {
         tripRepository.delete(trip);
 
         return new ApiResponseDTO(true, "Trip deleted successfully");
+    }
+    
+
+    public List<TripResponseDTO> searchTrips(String source, String destination, String date) {
+        LocalDate travelDate = (date != null && !date.isBlank())
+                ? LocalDate.parse(date) : null;
+        return tripRepository.searchTrips(source, destination, travelDate)
+                .stream().map(this::toDTO).toList();
     }
 }

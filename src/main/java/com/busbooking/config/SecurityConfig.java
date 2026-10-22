@@ -1,4 +1,3 @@
-
 package com.busbooking.config;
 
 import java.util.Base64;
@@ -35,7 +34,6 @@ public class SecurityConfig {
             @Value("${app.jwt.secret}") String secret) {
 
         byte[] keyBytes = Base64.getDecoder().decode(secret);
-
         SecretKey key = new SecretKeySpec(keyBytes, "HmacSHA256");
 
         return NimbusJwtDecoder.withSecretKey(key)
@@ -52,9 +50,7 @@ public class SecurityConfig {
         authoritiesConverter.setAuthoritiesClaimName("roles");
         authoritiesConverter.setAuthorityPrefix("");
 
-        JwtAuthenticationConverter converter =
-                new JwtAuthenticationConverter();
-
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
         converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
 
         return converter;
@@ -70,6 +66,16 @@ public class SecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/register", "/api/login").permitAll()
+               
+                .requestMatchers(
+                    "/api/trips/search",
+                    "/api/trips/*/seats",       
+                    "/api/routes/sources",
+                    "/api/routes/destinations",
+                    "/api/findTrip/**",
+                    "/api/findBus/**",
+                    "/api/findRoute/**"
+                ).permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 ->

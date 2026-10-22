@@ -1,8 +1,17 @@
 package com.busbooking.controllers;
 
+import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.busbooking.dto.ApiResponseDTO;
 import com.busbooking.dto.RouteRequestDTO;
@@ -46,5 +55,15 @@ public class RouteController {
     @DeleteMapping("/deleteRoute/{id}")
     public ApiResponseDTO deleteRoute(@PathVariable Long id) {
         return routeService.deleteRoute(id);
+    }
+    
+    @GetMapping("/routes/sources")
+    public List<String> allSources() {
+        return routeService.findAllSources();
+    }
+
+    @GetMapping("/routes/destinations")
+    public List<String> allDestinations() {
+        return routeService.findAllDestinations();
     }
 }

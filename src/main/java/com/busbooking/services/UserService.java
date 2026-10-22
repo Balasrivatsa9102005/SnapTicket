@@ -72,6 +72,7 @@ public class UserService {
         }
 
         String token = jwtService.generateToken(
+        		user.getId(),
                 user.getEmail(),
                 user.getRole()
         );

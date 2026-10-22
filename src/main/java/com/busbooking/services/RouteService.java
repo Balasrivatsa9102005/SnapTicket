@@ -1,5 +1,7 @@
 package com.busbooking.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.busbooking.dto.ApiResponseDTO;
@@ -87,5 +89,13 @@ public class RouteService {
         routeRepository.delete(route);
 
         return new ApiResponseDTO(true, "Route deleted successfully");
+    }
+    
+    public List<String> findAllSources() {
+        return routeRepository.findDistinctSources();
+    }
+
+    public List<String> findAllDestinations() {
+        return routeRepository.findDistinctDestinations();
     }
 }

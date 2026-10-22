@@ -1,4 +1,3 @@
-
 package com.busbooking.security;
 
 import java.time.Instant;
@@ -22,25 +21,28 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 @Service
 public class JwtService {
 
-	private final JwtEncoder jwtEncoder;
+    private final JwtEncoder jwtEncoder;
 
-	public JwtService(@Value("${app.jwt.secret}") String secret) {
-		byte[] keyBytes = Base64.getDecoder().decode(secret);
+    public JwtService(@Value("${app.jwt.secret}") String secret) {
+        byte[] keyBytes = Base64.getDecoder().decode(secret);
+        SecretKey key = new SecretKeySpec(keyBytes, "HmacSHA256");
+        this.jwtEncoder = new NimbusJwtEncoder(new ImmutableSecret<>(key));
+    }
 
-		SecretKey key = new SecretKeySpec(keyBytes, "HmacSHA256");
+    public String generateToken(Long userId, String email, String role) {
+        Instant now = Instant.now();
 
-		this.jwtEncoder = new NimbusJwtEncoder(new ImmutableSecret<>(key));
-	}
+        JwtClaimsSet claims = JwtClaimsSet.builder()
+                .issuer("bus-booking-system")
+                .subject(email)
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(3600))
+                .claim("roles", List.of("ROLE_" + role))
+                .claim("userId", userId)          
+                .build();
 
-	public String generateToken(String email, String role) {
-		Instant now = Instant.now();
+        JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
 
-		JwtClaimsSet claims = JwtClaimsSet.builder().issuer("bus-booking-system").subject(email).issuedAt(now)
-				.expiresAt(now.plusSeconds(3600)).claim("roles", List.of("ROLE_" + role)).build();
-
-		JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
-
-		return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
-	}
-
+        return jwtEncoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();
+    }
 }

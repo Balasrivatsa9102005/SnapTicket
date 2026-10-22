@@ -43,4 +43,16 @@ public interface TripRepository extends JpaRepository<Trip,Long>{
 		        @Param("tripId") Long tripId
 		);
 	
+	@Query("""
+	    SELECT t FROM Trip t
+	    WHERE LOWER(t.route.source) = LOWER(:source)
+	      AND LOWER(t.route.destination) = LOWER(:destination)
+	      AND (:date IS NULL OR t.travelDate = :date)
+	    ORDER BY t.departureTime
+	""")
+	List<Trip> searchTrips(
+	    @Param("source") String source,
+	    @Param("destination") String destination,
+	    @Param("date") LocalDate date);
+	
 }
